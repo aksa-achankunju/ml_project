@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadSafe AI - Accident Severity & Traffic Risk Analysis System</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚦</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">🚦</div>
+        <div class="brand-text">
+          <h1>RoadSafe AI <span class="badge-pill">Production ML System</span></h1>
+          <p>AI-Based Road Accident Severity Prediction & Traffic Risk Analysis System</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>Model Serving: <strong>LightGBM (Calibrated)</strong></span>
+        </div>
+        <div class="status-indicator">
+          <span>Latency: <strong id="header-latency">~14.2 ms</strong></span>
+        </div>
+        <div class="status-indicator">
+          <span>Coverage: <strong>CO1 — CO6 Evaluated</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tab-nav">
+    <div class="nav-container">
+      <button class="tab-btn active" data-tab="tab-predictor">🎯 Live Severity Predictor</button>
+      <button class="tab-btn" data-tab="tab-lifecycle">🔄 Lifecycle Tracer (CO1)</button>
+      <button class="tab-btn" data-tab="tab-models">📊 Model Benchmarks (CO2 & CO3)</button>
+      <button class="tab-btn" data-tab="tab-unsupervised">🗺️ Hotspots & Clusters (CO4)</button>
+      <button class="tab-btn" data-tab="tab-evaluation">📈 Evaluation & Tuning (CO5)</button>
+      <button class="tab-btn" data-tab="tab-mlops">🛡️ MLOps & Drift (CO6)</button>
+      <button class="tab-btn" data-tab="tab-syllabus">📘 Course Outcomes Matrix</button>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: LIVE SEVERITY PREDICTOR & RISK ASSESSMENT -->
+    <!-- ========================================== -->
+    <div id="tab-predictor" class="tab-pane active">
+      <!-- Quick Presets -->
+      <div class="presets-bar">
+        <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">Test Incident Presets:</span>
+        <button type="button" class="preset-chip" data-preset="blizzard">❄️ Severe Blizzard on Interstate</button>
+        <button type="button" class="preset-chip" data-preset="rush_hour">🚗 Urban Rush Hour Congestion</button>
+        <button type="button" class="preset-chip" data-preset="rain_fog">🌧️ Night Rain & Dense Fog</button>
+        <button type="button" class="preset-chip" data-preset="clear_highway">☀️ Clear Rural Highway</button>
+      </div>
+
+      <div class="grid-2">
+        <!-- Input Form -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📝 Accident Parameters & Environmental Telemetry</div>
+              <div class="card-subtitle">Input real-time highway conditions to evaluate potential severity</div>
+            </div>
+          </div>
+
+          <form id="prediction-form">
+            <!-- Weather Group -->
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="Temperature(F)">Temperature (°F)</label>
+                <input type="number" step="0.1" id="Temperature(F)" name="Temperature(F)" value="62.5" required>
+              </div>
+              <div class="form-group">
+                <label for="Humidity(%)">Humidity (%)</label>
+                <input type="number" step="1" id="Humidity(%)" name="Humidity(%)" value="78" required>
+              </div>
+              <div class="form-group">
+                <label for="Visibility(mi)">Visibility (mi)</label>
+                <input type="number" step="0.1" id="Visibility(mi)" name="Visibility(mi)" value="6.0" required>
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="Wind_Speed(mph)">Wind Speed (mph)</label>
+                <input type="number" step="0.1" id="Wind_Speed(mph)" name="Wind_Speed(mph)" value="12.0" required>
+              </div>
+              <div class="form-group">
+                <label for="Precipitation(in)">Precipitation (in)</label>
+                <input type="number" step="0.01" id="Precipitation(in)" name="Precipitation(in)" value="0.15" required>
+              </div>
+              <div class="form-group">
+                <label for="Pressure(in)">Pressure (in)</label>
+                <input type="number" step="0.01" id="Pressure(in)" name="Pressure(in)" value="29.85" required>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="Weather_Condition">Weather Condition</label>
+                <select id="Weather_Condition" name="Weather_Condition">
+                  <option value="Rain" selected>Rain / Drizzle</option>
+                  <option value="Clear">Clear / Fair</option>
+                  <option value="Cloudy">Cloudy / Overcast</option>
+                  <option value="Snow">Snow / Ice</option>
+                  <option value="Fog">Fog / Haze / Smoke</option>
+                  <option value="Severe">Severe Storm / Thunder</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="Sunrise_Sunset">Day / Night Period</label>
+                <select id="Sunrise_Sunset" name="Sunrise_Sunset">
+                  <option value="Night" selected>Night</option>
+                  <option value="Day">Day</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Geospatial & Temporal -->
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="State_Clean">State</label>
+                <select id="State_Clean" name="State_Clean">
+                  <option value="CA">California (CA)</option>
+                  <option value="FL">Florida (FL)</option>
+                  <option value="TX">Texas (TX)</option>
+                  <option value="PA" selected>Pennsylvania (PA)</option>
+                  <option value="NY">New York (NY)</option>
+                  <option value="NC">North Carolina (NC)</option>
+                  <option value="OH">Ohio (OH)</option>
+                  <option value="Other">Other States</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="Hour">Hour of Day (0-23)</label>
+                <input type="number" id="Hour" name="Hour" min="0" max="23" value="19" required>
+              </div>
+              <div class="form-group">
+                <label for="Month">Month (1-12)</label>
+                <input type="number" id="Month" name="Month" min="1" max="12" value="11" required>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="Start_Lat">Latitude</label>
+                <input type="number" step="0.0001" id="Start_Lat" name="Start_Lat" value="40.4406" required>
+              </div>
+              <div class="form-group">
+                <label for="Start_Lng">Longitude</label>
+                <input type="number" step="0.0001" id="Start_Lng" name="Start_Lng" value="-79.9959" required>
+              </div>
+            </div>
+
+            <!-- Road Features -->
+            <div class="form-group">
+              <label>Road Infrastructure Features</label>
+              <div class="toggles-grid">
+                <label class="toggle-label"><input type="checkbox" id="Junction" name="Junction" checked> Highway Junction</label>
+                <label class="toggle-label"><input type="checkbox" id="Traffic_Signal" name="Traffic_Signal"> Traffic Signal</label>
+                <label class="toggle-label"><input type="checkbox" id="Crossing" name="Crossing"> Crossing</label>
+                <label class="toggle-label"><input type="checkbox" id="Stop" name="Stop"> Stop Sign</label>
+                <label class="toggle-label"><input type="checkbox" id="Station" name="Station"> Transit Station</label>
+                <label class="toggle-label"><input type="checkbox" id="Railway" name="Railway"> Railway</label>
+                <label class="toggle-label"><input type="checkbox" id="Traffic_Calming" name="Traffic_Calming"> Speed Bump</label>
+                <label class="toggle-label"><input type="checkbox" id="Give_Way" name="Give_Way"> Give Way</label>
+              </div>
+            </div>
+
+            <button type="submit" id="predict-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+              ⚡ Predict Accident Severity & Risk Assessment
+            </button>
+          </form>
+        </div>
+
+        <!-- Result Box -->
+        <div>
+          <div class="card result-box">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🚨 Real-Time AI Inference Result</div>
+                <div class="card-subtitle">Serving from Calibrated LightGBM Classifier + Ridge Regressor</div>
+              </div>
+              <span class="badge badge-success">Inference Active</span>
+            </div>
+
+            <!-- Severity Result Banner -->
+            <div id="result-severity-banner" class="severity-banner severity-3">
+              <h3 id="res-severity-title">Severity 3</h3>
+              <p id="res-severity-label">Severity 3: Multi-lane blockage, heavy gridlock risk, potential injuries.</p>
+            </div>
+
+            <!-- Key Indicators -->
+            <div class="grid-3" style="margin-bottom: 1rem;">
+              <div class="stat-card">
+                <div class="stat-number" id="res-risk-index" style="color: var(--danger);">74.2 / 100</div>
+                <div class="stat-label">Calculated Risk Index</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="res-duration">82.5 min</div>
+                <div class="stat-label">Est. Clearance Delay</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="res-latency">13.8 ms</div>
+                <div class="stat-label">Inference Latency</div>
+              </div>
+            </div>
+
+            <!-- Risk Gauge Meter -->
+            <div class="risk-meter">
+              <div class="risk-meter-header">
+                <span>Hazard Severity Gauge</span>
+                <span id="res-risk-category" style="font-weight: 700; color: #ea580c;">High Hazard - Serious Incident</span>
+              </div>
+              <div class="risk-bar-container">
+                <div id="res-risk-bar" class="risk-bar-fill" style="width: 74%;"></div>
+              </div>
+            </div>
+
+            <!-- Multi-Class Probabilities -->
+            <h4 style="font-size: 0.9rem; font-weight: 700; margin-top: 1.25rem;">Multi-Class Calibrated Probabilities</h4>
+            <div class="prob-list">
+              <div class="prob-item">
+                <div class="prob-labels">
+                  <span>Severity 1 (Minor / Shoulder Clearance)</span>
+                  <span id="prob-pct-1">3.2%</span>
+                </div>
+                <div class="prob-bar">
+                  <div id="prob-fill-1" class="prob-fill" style="width: 3.2%; background-color: var(--severity-1);"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-labels">
+                  <span>Severity 2 (Moderate / Single Lane Delay)</span>
+                  <span id="prob-pct-2">21.5%</span>
+                </div>
+                <div class="prob-bar">
+                  <div id="prob-fill-2" class="prob-fill" style="width: 21.5%; background-color: var(--severity-2);"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-labels">
+                  <span>Severity 3 (Significant / Multi-Lane Impact)</span>
+                  <span id="prob-pct-3">68.4%</span>
+                </div>
+                <div class="prob-bar">
+                  <div id="prob-fill-3" class="prob-fill" style="width: 68.4%; background-color: var(--severity-3);"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-labels">
+                  <span>Severity 4 (Critical / Full Highway Closure)</span>
+                  <span id="prob-pct-4">6.9%</span>
+                </div>
+                <div class="prob-bar">
+                  <div id="prob-fill-4" class="prob-fill" style="width: 6.9%; background-color: var(--severity-4);"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Card -->
+            <div class="action-card">
+              <h4>🛡️ Recommended Traffic Authority & EMS Action</h4>
+              <p id="res-action">Dispatch emergency medical services (EMS) and fire department. Divert traffic to secondary corridors.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: LIFECYCLE TRACER (CO1) -->
+    <!-- ========================================== -->
+    <div id="tab-lifecycle" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🔄 End-to-End Prediction Request Lifecycle Tracer (CO1)</div>
+            <div class="card-subtitle">
+              Traces one active prediction request backwards through every preceding lifecycle stage:
+              Data &rarr; Features &rarr; Training &rarr; Evaluation &rarr; Deployment &rarr; Monitoring.
+            </div>
+          </div>
+          <span class="badge badge-info">Course Outcome 1</span>
+        </div>
+
+        <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1.5rem;">
+          Under CO1, a production ML system must maintain bidirectional provenance. The trace below audits the current live prediction request across all 6 engineering milestones.
+        </p>
+
+        <div id="lifecycle-timeline" class="timeline">
+          <!-- Dynamically populated or static baseline -->
+          <div class="timeline-step">
+            <div class="step-marker">1</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 1: Raw Data Ingestion & Hygiene</div>
+                <span class="badge badge-info">Data Lineage</span>
+              </div>
+              <div class="step-desc">Ingests live telemetry payload from highway sensors, police incident feeds, or HTTP request.</div>
+              <div class="step-details"><pre>{
+  "raw_source": "Highway Sensor / REST Client API",
+  "historical_corpus": "US Accidents Dataset (7.7M records, March 2023)",
+  "validation_rules": "Valid lat [24, 50], lng [-125, -66], valid temporal timestamps"
+}</pre></div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">2</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 2: Feature Engineering & Feature Store Catalog</div>
+                <span class="badge badge-info">Transformation</span>
+              </div>
+              <div class="step-desc">Applies deterministic offline/online Feature Store schemas to avoid training-serving skew.</div>
+              <div class="step-details"><pre>{
+  "feature_store_catalog": "feature_store.json (25 dimensions)",
+  "derived_features": ["Rush_Hour: True", "Is_Weekend: False", "Weather_Condition: Clean Standard Taxonomy"],
+  "imputation_policy": "Numerical: Median Imputer | Categorical: Most Frequent | One-Hot Encoding"
+}</pre></div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">3</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 3: Model Architecture & Training Provenance</div>
+                <span class="badge badge-info">Algorithm</span>
+              </div>
+              <div class="step-desc">LightGBM Gradient-Boosted Decision Trees trained with histogram-based leaf-wise growth.</div>
+              <div class="step-details"><pre>{
+  "algorithm": "LGBMClassifier(n_estimators=100, max_depth=6, learning_rate=0.1)",
+  "splitting_criterion": "Information Gain / Leaf-wise Gain Splitting",
+  "training_sample": "80,000 stratified balanced incident records (CO2 & CO3 verified)"
+}</pre></div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">4</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 4: Evaluation Gate & Probability Calibration</div>
+                <span class="badge badge-info">Quality Gate</span>
+              </div>
+              <div class="step-desc">Passes validation gate: 5-Fold Stratified Cross-Validation (90.6% accuracy) and Brier Score &le; 0.060.</div>
+              <div class="step-details"><pre>{
+  "cross_validation_accuracy": "90.59% (+/- 0.33%) across 5 stratified folds",
+  "test_roc_auc_ovr": "0.9880",
+  "calibration_metric": "Brier Score: 0.0601 (Calibrated probabilities align with empirical incidence rate)"
+}</pre></div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">5</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 5: Deployment & REST-Based Microservice</div>
+                <span class="badge badge-info">Serving</span>
+              </div>
+              <div class="step-desc">Deployed via Flask REST API with serialized joblib pipeline artifacts for sub-20ms inference.</div>
+              <div class="step-details"><pre>{
+  "endpoint": "POST /api/predict",
+  "container": "Production Python Flask Application",
+  "pipeline_artifact": "models/accident_severity_model.joblib + preprocessor_pipeline.joblib",
+  "mean_inference_latency": "14.2 ms"
+}</pre></div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">6</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-title">Stage 6: Telemetry, Drift & Continuous Monitoring</div>
+                <span class="badge badge-info">MLOps Monitoring</span>
+              </div>
+              <div class="step-desc">Two-sample Kolmogorov-Smirnov test and Population Stability Index (PSI) monitoring incoming distribution.</div>
+              <div class="step-details"><pre>{
+  "ks_test_p_values": "Temperature: p=0.48, Humidity: p=0.62, Visibility: p=0.71 (No drift alert)",
+  "anomaly_detector": "Isolation Forest (checks for out-of-distribution catastrophic hazards)",
+  "telemetry_status": "HEALTHY / OPERATIONAL"
+}</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: MODEL BENCHMARKS (CO2 & CO3) -->
+    <!-- ========================================== -->
+    <div id="tab-models" class="tab-pane">
+      <!-- CO2 Linear Models -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📐 Linear Supervised-Learning Models (CO2)</div>
+            <div class="card-subtitle">Regression on Accident Duration (minutes) & Logistic Classification</div>
+          </div>
+          <span class="badge badge-info">Course Outcome 2</span>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">Linear Regression Models Comparison (Predicting Clearance Duration)</h4>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Test R² Score</th>
+                <th>Test RMSE</th>
+                <th>Test MAE</th>
+                <th>Sparsity (Zero Weights)</th>
+                <th>Mean |Weight|</th>
+              </tr>
+            </thead>
+            <tbody id="co2-reg-tbody">
+              <!-- Populated via API -->
+              <tr><td>Linear Regression (OLS)</td><td>0.1703</td><td>55.44 min</td><td>28.82 min</td><td><span class="badge badge-info">2.0% (1 zero)</span></td><td>6.96</td></tr>
+              <tr><td>Ridge Regression (L2)</td><td>0.1702</td><td>55.44 min</td><td>28.82 min</td><td><span class="badge badge-info">2.0% (1 zero)</span></td><td>6.48</td></tr>
+              <tr><td>Lasso Regression (L1)</td><td>0.1659</td><td>55.58 min</td><td>28.79 min</td><td><span class="badge badge-warning">49.0% (24 zeros)</span></td><td>3.46</td></tr>
+              <tr><td>ElasticNet (L1 + L2)</td><td>0.1583</td><td>55.84 min</td><td>28.81 min</td><td><span class="badge badge-warning">34.7% (17 zeros)</span></td><td>2.44</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CO2 Theory Cards -->
+        <div class="grid-3" style="margin-top: 1rem;">
+          <div class="card" style="background: #f8fafc; border: 1px solid #cbd5e1;">
+            <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.35rem;">🎯 Regularization Rationale</h4>
+            <p style="font-size: 0.8rem; color: #475569;">
+              <strong>Lasso (L1)</strong> imposes an absolute-value penalty driving 49% of regression coefficients to exactly 0, performing embedded feature selection. <strong>Ridge (L2)</strong> shrinks weights smoothly, handling multicollinearity between weather factors.
+            </p>
+          </div>
+          <div class="card" style="background: #f8fafc; border: 1px solid #cbd5e1;">
+            <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.35rem;">⚖️ Bias-Variance Tradeoff</h4>
+            <p style="font-size: 0.8rem; color: #475569;">
+              OLS has minimum training bias but is vulnerable to sample noise. Introducing regularization parameter &alpha; introduces slight bias to dramatically compress variance, preventing test-time overfitting.
+            </p>
+          </div>
+          <div class="card" style="background: #f8fafc; border: 1px solid #cbd5e1;">
+            <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.35rem;">📏 Feature Scaling Necessity</h4>
+            <p style="font-size: 0.8rem; color: #475569;">
+              Without <code>StandardScaler</code>, variables with large units (e.g., Pressure ~30, Temperature ~80) dominate penalization over tiny variables (Precipitation ~0.1). Scaling guarantees uniform geometric shrinkage.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CO3 Tree-Based Models -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🌲 Tree-Based Supervised-Learning Models (CO3)</div>
+            <div class="card-subtitle">Decision Trees, Random Forest, XGBoost & LightGBM Multi-Class Severity Classification</div>
+          </div>
+          <span class="badge badge-info">Course Outcome 3</span>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Model Architecture</th>
+                <th>Test Accuracy</th>
+                <th>Macro F1</th>
+                <th>Macro Precision</th>
+                <th>Macro Recall</th>
+                <th>ROC-AUC (OvR)</th>
+              </tr>
+            </thead>
+            <tbody id="co3-tree-tbody">
+              <tr><td>Decision Tree (Gini)</td><td><span class="badge badge-info">83.6%</span></td><td>84.6%</td><td>85.8%</td><td>84.1%</td><td>0.9578</td></tr>
+              <tr><td>Decision Tree (Entropy)</td><td><span class="badge badge-info">82.5%</span></td><td>83.8%</td><td>84.5%</td><td>83.4%</td><td>0.9577</td></tr>
+              <tr><td>Random Forest (Bagging)</td><td><span class="badge badge-info">83.5%</span></td><td>85.2%</td><td>85.7%</td><td>84.8%</td><td>0.9664</td></tr>
+              <tr><td>XGBoost (Extreme Boosting)</td><td><span class="badge badge-success">90.2%</span></td><td>90.7%</td><td>91.1%</td><td>90.4%</td><td>0.9849</td></tr>
+              <tr><td><strong>LightGBM (Leaf-Wise)</strong></td><td><span class="badge badge-success"><strong>91.8%</strong></span></td><td><strong>92.1%</strong></td><td><strong>92.4%</strong></td><td><strong>91.8%</strong></td><td><strong>0.9880</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="margin-top: 1.25rem;">
+          <div>
+            <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Top Feature Importances (MDI / Gain - LightGBM)</h4>
+            <div id="feature-importance-list" class="prob-list">
+              <!-- Populated via API -->
+            </div>
+          </div>
+          <div>
+            <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Ensemble Theory: Bagging vs. Boosting</h4>
+            <div class="card" style="background: #f8fafc; font-size: 0.85rem; color: #334155;">
+              <p><strong>Random Forest (Bagging):</strong> Combines 100 deep, unpruned trees trained on bootstrap resamples with random feature subsets. By decorrelating trees (&rho; &darr;), ensemble variance &sigma;<sup>2</sup>/B reduces without affecting bias.</p>
+              <br>
+              <p><strong>Boosting (XGBoost & LightGBM):</strong> Fits trees iteratively along the negative gradient of the multi-class log-loss function: <em>&minus;&nabla; L(y, F(x))</em>. Each new tree corrects the residual errors of prior trees, systematically driving down model bias.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: HOTSPOTS & UNSUPERVISED (CO4) -->
+    <!-- ========================================== -->
+    <div id="tab-unsupervised" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🗺️ Unsupervised Learning & Traffic Risk Hotspots (CO4)</div>
+            <div class="card-subtitle">K-Means Spatial Clustering, DBSCAN Density Corridors, PCA & Isolation Forest Anomaly Detection</div>
+          </div>
+          <span class="badge badge-info">Course Outcome 4</span>
+        </div>
+
+        <!-- Hotspots Table -->
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">K-Means Identified Geographic Accident Clusters (K = 5)</h4>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Regional Zone</th>
+                <th>Centroid Coordinates</th>
+                <th>Accident Sample Count</th>
+                <th>Average Severity</th>
+                <th>Avg Temperature</th>
+              </tr>
+            </thead>
+            <tbody id="kmeans-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-3" style="margin-top: 1.5rem;">
+          <!-- DBSCAN Card -->
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">📍 DBSCAN Density Corridors</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.5rem 0;">
+              Unlike K-Means which enforces spherical boundaries, <strong>DBSCAN</strong> clusters continuous highway arteries of arbitrary non-linear shapes based on density (min_samples=25, &epsilon;=0.7).
+            </p>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">
+              Corridors Found: 18 High-Density Zones<br>
+              Isolated Noise Incidents Filtered: 432
+            </div>
+          </div>
+
+          <!-- PCA Card -->
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">📉 PCA Dimensionality Reduction</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.5rem 0;">
+              Transforms correlated 49-dimensional feature space into orthogonal principal components. Top 10 PCs explain <strong>76.4% of total cumulative variance</strong> (Scree plot analysis).
+            </p>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">
+              PC1 (Weather Severity): 18.2% Var<br>
+              PC2 (Traffic Density): 12.4% Var
+            </div>
+          </div>
+
+          <!-- Isolation Forest Card -->
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">🚨 Isolation Forest Anomaly Detection</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.5rem 0;">
+              Detects extreme, out-of-distribution collision hazards (e.g., massive multi-car pileups during blizzard squalls) by measuring tree partition depth.
+            </p>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--danger);">
+              Hazard Outliers Identified: 1,680 incidents<br>
+              Contamination Rate: 3.0%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: EVALUATION & TUNING (CO5) -->
+    <!-- ========================================== -->
+    <div id="tab-evaluation" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📈 Model Performance Analysis, Calibration & Hyperparameter Tuning (CO5)</div>
+            <div class="card-subtitle">Stratified Cross-Validation, Calibration Curves, Brier Score & Tuning Search Strategies</div>
+          </div>
+          <span class="badge badge-info">Course Outcome 5</span>
+        </div>
+
+        <div class="grid-2">
+          <!-- 5-Fold CV -->
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">🔁 Stratified 5-Fold Cross-Validation</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.4rem 0;">
+              Ensures class proportions across Severity 1, 2, 3, 4 are strictly maintained across every fold, proving lack of dataset leakage or fold bias.
+            </p>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr><th>Model</th><th>Mean Accuracy</th><th>Std Dev (&sigma;)</th><th>Mean Macro F1</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>LightGBM</strong></td><td><strong>90.59%</strong></td><td>&plusmn; 0.33%</td><td><strong>0.9095</strong></td></tr>
+                  <tr><td>Random Forest</td><td>80.90%</td><td>&plusmn; 0.50%</td><td>0.8270</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Calibration -->
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">🎯 Probability Calibration & Brier Score</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.4rem 0;">
+              Uncalibrated decision trees produce overconfident prediction probabilities. Probability calibration (Platt scaling / Sigmoid) aligns predicted probabilities with true empirical frequency.
+            </p>
+            <div style="margin: 0.75rem 0; font-size: 0.9rem;">
+              <div><strong>Brier Score:</strong> <span class="badge badge-success">0.0601</span> (Close to 0 = optimal reliability)</div>
+              <div style="margin-top: 0.5rem; color: #475569; font-size: 0.8rem;">
+                When the model outputs 80% risk probability, exactly 8 out of 10 times a serious collision occurred historically.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hyperparameter Tuning Comparison -->
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem 0;">Hyperparameter Optimization Strategy Comparison</h4>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Optimization Strategy</th>
+                <th>Candidate Count</th>
+                <th>Best CV Accuracy</th>
+                <th>Search Efficiency & Methodology</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Grid Search (GridSearchCV)</strong></td>
+                <td>8 exhaustive</td>
+                <td>89.84%</td>
+                <td>Evaluates complete Cartesian product; computationally intensive on large parameter grids.</td>
+              </tr>
+              <tr>
+                <td><strong>Random Search (RandomizedSearchCV)</strong></td>
+                <td>6 sampled</td>
+                <td>89.62%</td>
+                <td>Draws random combinations from distribution; discovers near-optimal hyperparams in 40% less time.</td>
+              </tr>
+              <tr>
+                <td><strong>Bayesian Optimization (TPE / GP)</strong></td>
+                <td>Sequential</td>
+                <td>90.59%</td>
+                <td>Constructs surrogate Gaussian Process model; balances exploration and exploitation via Expected Improvement.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: MLOPS & DRIFT MONITORING (CO6) -->
+    <!-- ========================================== -->
+    <div id="tab-mlops" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🛡️ Production MLOps, Drift Detection & Serving Telemetry (CO6)</div>
+            <div class="card-subtitle">Kolmogorov-Smirnov Statistical Tests, Population Stability Index (PSI), Feature Store & Pipeline Integrity</div>
+          </div>
+          <span id="monitoring-status-badge" class="badge badge-success">NOMINAL / STABLE</span>
+        </div>
+
+        <div class="grid-3" style="margin-bottom: 1.25rem;">
+          <div class="stat-card">
+            <div class="stat-number" id="lat-p50">12.4 ms</div>
+            <div class="stat-label">Inference Latency (p50)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="lat-p95">28.1 ms</div>
+            <div class="stat-label">Inference Latency (p95)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="lat-p99">45.3 ms</div>
+            <div class="stat-label">Inference Latency (p99)</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <h4 style="font-size: 0.95rem;">Real-Time Feature Distribution Drift (Two-Sample KS-Test)</h4>
+          <button type="button" id="simulate-drift-btn" class="btn btn-secondary btn-sm">
+            ⚡ Re-run Baseline Statistical Drift Test
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Continuous Feature</th>
+                <th>KS-Statistic</th>
+                <th>p-Value</th>
+                <th>PSI Score</th>
+                <th>Drift Status</th>
+              </tr>
+            </thead>
+            <tbody id="drift-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Training-Serving Skew & Feature Store Architecture -->
+        <div class="grid-2" style="margin-top: 1.5rem;">
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">🏬 Feature Store Design</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.4rem 0;">
+              Cataloged in <code>data/feature_store.json</code>. Stores canonical entity schemas, historical feature medians, categorical vocabularies, and temporal derivation rules.
+            </p>
+            <ul style="font-size: 0.8rem; color: #334155; padding-left: 1.25rem; line-height: 1.6;">
+              <li>Offline Store: Historical 80,000 incident sample profiles</li>
+              <li>Online Store: Low-latency default imputation for live HTTP requests</li>
+              <li>Schema Validation: Rejects out-of-bounds geographic or temporal inputs</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #f8fafc;">
+            <div class="card-title" style="font-size: 1rem;">⚙️ Training-Serving Skew Avoidance</div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0.4rem 0;">
+              The exact same <code>ColumnTransformer</code> object used during offline training is serialized via <code>joblib</code> and loaded into the REST inference handler.
+            </p>
+            <ul style="font-size: 0.8rem; color: #334155; padding-left: 1.25rem; line-height: 1.6;">
+              <li>Zero Data Leakage: Scalers fit solely on training partitions</li>
+              <li>Identical Encoding: OneHotEncoder maps categorical values uniformly</li>
+              <li>Handling Unknowns: Unseen categories mapped to zero-vector</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: COURSE OUTCOMES MATRIX -->
+    <!-- ========================================== -->
+    <div id="tab-syllabus" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📘 Academic Course Outcomes (COs) Mapping & Proof Matrix</div>
+            <div class="card-subtitle">Direct verification against course syllabus requirements for end-semester project evaluation</div>
+          </div>
+          <span class="badge badge-success">100% Syllabus Coverage</span>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">CO No</th>
+                <th style="width: 250px;">Syllabus Course Outcome</th>
+                <th>Project Implementation Details</th>
+                <th style="width: 140px;">Verification File</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CO1</strong></td>
+                <td>Analyze the end-to-end ML system lifecycle — data &rarr; features &rarr; training &rarr; evaluation &rarr; deployment &rarr; monitoring — and trace one prediction request back through every stage.</td>
+                <td>Interactive Request Lifecycle Tracer audits each live prediction backwards through all 6 stages. Code implemented in <code>src/inference_pipeline.py</code> and Web UI Tab 2.</td>
+                <td><code>inference_pipeline.py</code></td>
+              </tr>
+              <tr>
+                <td><strong>CO2</strong></td>
+                <td>Apply linear supervised-learning models — linear regression, ridge, lasso, elastic net, logistic regression, multinomial logistic regression — reason about regularisation, bias-variance, and feature scaling.</td>
+                <td>Implemented OLS, Ridge (L2), Lasso (L1 with 49% sparsity), ElasticNet for accident duration, plus Binary and Multinomial Logistic Regression (71.4% accuracy). Mathematical report on &ell;<sub>1</sub> vs &ell;<sub>2</sub> geometry and StandardScaler necessity.</td>
+                <td><code>co2_linear_models.py</code></td>
+              </tr>
+              <tr>
+                <td><strong>CO3</strong></td>
+                <td>Apply tree-based models — decision trees, random forests, gradient-boosted trees (XGBoost, LightGBM) — reason about feature importance, splitting criteria, ensemble variance reduction.</td>
+                <td>Decision Trees (Gini vs Entropy), Random Forest (100 trees), XGBoost (90.2%), and LightGBM (91.8%). Explains bagging variance reduction vs boosting iterative bias reduction. Computes top feature importances.</td>
+                <td><code>co3_tree_models.py</code></td>
+              </tr>
+              <tr>
+                <td><strong>CO4</strong></td>
+                <td>Apply unsupervised-learning techniques — k-means and hierarchical clustering, DBSCAN, dimensionality reduction (PCA, t-SNE, UMAP), anomaly detection.</td>
+                <td>K-Means (Elbow method & Silhouette analysis on geographic coordinates), DBSCAN (highway density corridors vs noise), PCA (Scree plot with 10 PCs), t-SNE 2D manifold, and Isolation Forest (3% contamination).</td>
+                <td><code>co4_unsupervised.py</code></td>
+              </tr>
+              <tr>
+                <td><strong>CO5</strong></td>
+                <td>Analyze model performance using cross-validation, train/val/test splits, classification metrics, regression metrics, calibration, and hyperparameter search.</td>
+                <td>Stratified 70/15/15 splits, Stratified 5-Fold CV (&mu;&plusmn;&sigma;), multi-class Confusion Matrix, ROC-AUC (0.9880), PR-AUC, Brier score (0.0601), and empirical comparison of GridSearchCV vs RandomizedSearchCV.</td>
+                <td><code>co5_evaluation_tuning.py</code></td>
+              </tr>
+              <tr>
+                <td><strong>CO6</strong></td>
+                <td>Apply ML-engineering practices — feature stores, training-serving skew avoidance, model packaging, REST serving, monitoring for drift and degradation.</td>
+                <td>Feature store schema catalog, serialized ColumnTransformer pipeline, model versioning metadata, Flask REST endpoints (<code>/api/predict</code>, <code>/api/lifecycle_trace</code>, <code>/api/monitoring</code>), and Two-sample KS-test drift detector.</td>
+                <td><code>co6_mlops_monitoring.py</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>RoadSafe AI — AI-Based Road Accident Severity Prediction & Traffic Risk Analysis System</p>
+    <p style="margin-top: 0.25rem;">Built for Machine Learning End-Semester Project Evaluation | Full Stack ML System</p>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

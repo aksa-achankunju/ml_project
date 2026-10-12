@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "entity": "accident_record",
+    "version": "v1.0",
+    "source_dataset": "US_Accidents_March23.csv",
+    "total_records_processed": 80000,
+    "classes": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "feature_statistics": {
+    "Temperature(F)": {
+      "mean": 65.8569475,
+      "std": 14.593508432290992,
+      "median": 66.0
+    },
+    "Humidity(%)": {
+      "mean": 65.5482625,
+      "std": 22.175982343709265,
+      "median": 68.0
+    },
+    "Pressure(in)": {
+      "mean": 29.744964624999998,
+      "std": 0.7513690126635675,
+      "median": 29.93
+    },
+    "Visibility(mi)": {
+      "mean": 9.2883145,
+      "std": 2.085308371794761,
+      "median": 10.0
+    },
+    "Wind_Speed(mph)": {
+      "mean": 7.601758749999999,
+      "std": 4.521045844712544,
+      "median": 6.9
+    },
+    "Precipitation(in)": {
+      "mean": 0.003967875,
+      "std": 0.042200971310019854,
+      "median": 0.0
+    },
+    "Distance(mi)": {
+      "mean": 0.8666184875124312,
+      "std": 3.000959198790791,
+      "median": 0.0
+    },
+    "Duration_Minutes": {
+      "mean": 59.04027916666667,
+      "std": 60.75967476901872,
+      "median": 44.6
+    }
+  },
+  "categorical_vocabularies": {
+    "Weather_Condition": [
+      "Cloudy",
+      "Clear",
+      "Rain",
+      "Severe",
+      "Fog",
+      "Snow",
+      "Other"
+    ],
+    "Sunrise_Sunset": [
+      "Day",
+      "Night"
+    ],
+    "State_Clean": [
+      "CA",
+      "SC",
+      "FL",
+      "TX",
+      "GA",
+      "OH",
+      "NC",
+      "VA",
+      "PA",
+      "TN",
+      "IL",
+      "LA",
+      "MI",
+      "MA",
+      "MD",
+      "Other"
+    ]
+  },
+  "road_features": [
+    "Amenity",
+    "Bump",
+    "Crossing",
+    "Give_Way",
+    "Junction",
+    "No_Exit",
+    "Railway",
+    "Roundabout",
+    "Station",
+    "Stop",
+    "Traffic_Calming",
+    "Traffic_Signal"
+  ]
+}

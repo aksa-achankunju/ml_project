@@ -1,0 +1,9 @@
+{
+  "system_name": "RoadSafe AI",
+  "version": "1.0.0",
+  "timestamp": "2026-10-06 09:44:38 UTC",
+  "total_records_trained": 56000,
+  "total_records_tested": 12000,
+  "primary_classifier": "LightGBM Classifier",
+  "primary_regressor": "Ridge Regression (L2)"
+}
